@@ -21,7 +21,7 @@ export const StoreProvider = ({ children }) => {
   const [authLoading, setAuthLoading] = useState(true);
 
   // Admin configuration
-  const ADMIN_EMAILS = ['bhavyasri2001@gmail.com'];
+  const ADMIN_EMAILS = ['v.bhavyasri2001@gmail.com'];
 
   // Auth listener
   useEffect(() => {
