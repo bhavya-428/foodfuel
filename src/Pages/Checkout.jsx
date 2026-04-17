@@ -85,6 +85,30 @@ function Checkout() {
     );
   }
 
+  if (!currentUser) {
+    return (
+      <div className="checkout-page">
+        <div className="checkout-container">
+          <div className="checkout-card checkout-success">
+            <div className="success-icon">🔒</div>
+            <div className="success-message">
+              <h2>Sign In to Continue</h2>
+              <p>You need to be logged in to place an order. Join Food Club for free and start ordering!</p>
+              <div style={{display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '10px'}}>
+                <Link to="/Auth">
+                  <button className="back-home-btn">Sign In / Sign Up</button>
+                </Link>
+                <Link to="/Menu">
+                  <button className="back-home-btn" style={{background: 'var(--glass)', color: 'var(--text-color)', border: '1px solid var(--glass-border)'}}>Back to Menu</button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (cart.length === 0) {
     return (
       <div className="checkout-page">
