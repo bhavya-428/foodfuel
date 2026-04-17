@@ -310,7 +310,7 @@ function Admin() {
         <div className="danger-zone">
           <h2 className="admin-section-title" style={{color: '#e74c3c', borderColor: '#e74c3c'}}>Danger Zone</h2>
           <div className="card" style={{borderColor: '#e74c3c', borderStyle: 'dashed'}}>
-            <p style={{color: var('--muted-text'), marginBottom: '15px'}}>
+            <p style={{color: '#888', marginBottom: '15px'}}>
               Reset the customer database to clear all orders, wishlists, and non-admin profiles. 
               <strong> This cannot be undone.</strong>
             </p>
