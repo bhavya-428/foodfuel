@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import './Auth.css';
 
@@ -10,12 +10,32 @@ function Auth() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address first.');
+      return;
+    }
+    setError('');
+    setMessage('');
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage('Password reset email sent! Check your inbox.');
+    } catch (err) {
+      setError('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
     setLoading(true);
 
     try {
@@ -56,6 +76,7 @@ function Auth() {
         </div>
 
         {error && <div className="auth-error">{error}</div>}
+        {message && <div className="auth-success" style={{color: '#2ed573', textAlign: 'center', marginBottom: '15px'}}>{message}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {!isLogin && (
@@ -81,13 +102,23 @@ function Auth() {
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+              <label>Password</label>
+              {isLogin && (
+                <span 
+                  onClick={handleForgotPassword} 
+                  style={{fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold'}}
+                >
+                  Forgot Password?
+                </span>
+              )}
+            </div>
             <input
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              required={isLogin} // Not required for password reset flow but required for submit
               minLength={6}
             />
           </div>
@@ -98,7 +129,7 @@ function Auth() {
 
         <p className="auth-toggle">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <span onClick={() => { setIsLogin(!isLogin); setError(''); }}>
+          <span onClick={() => { setIsLogin(!isLogin); setError(''); setMessage(''); }}>
             {isLogin ? 'Sign Up' : 'Sign In'}
           </span>
         </p>

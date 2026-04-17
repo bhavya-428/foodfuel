@@ -153,6 +153,22 @@ function Admin() {
               <form onSubmit={handleAddItem}>
                 <input type="text" placeholder="Name" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} required />
                 <input type="text" placeholder="Price (e.g. 50/-)" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} required />
+                <select 
+                  value={newItem.type} 
+                  onChange={e => setNewItem({...newItem, type: e.target.value})}
+                  className="status-select"
+                  style={{width: '100%', marginBottom: '15px'}}
+                >
+                  <option value="Ice Creams">Ice Creams</option>
+                  <option value="Sundaes">Sundaes</option>
+                  <option value="Waffles">Waffles</option>
+                  <option value="Shakes">Shakes</option>
+                  <option value="Cakes">Cakes</option>
+                  <option value="Smoothies">Smoothies</option>
+                  <option value="Shawarma">Shawarma</option>
+                  <option value="Starters">Starters</option>
+                  <option value="Pizzas">Pizzas</option>
+                </select>
                 <input type="text" placeholder="Image URL" value={newItem.img} onChange={e => setNewItem({...newItem, img: e.target.value})} required />
                 <button type="submit" className="browse-btn">Add Item</button>
               </form>
