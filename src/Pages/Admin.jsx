@@ -131,13 +131,19 @@ function Admin() {
       const toDelete = [];
 
       snap.docs.forEach(d => {
-        const itemId = d.data().id;
-        if (seen.has(itemId)) {
-          toDelete.push(d.id); // Mark duplicate for deletion
+        const name = d.data().name;
+        if (!name || seen.has(name)) {
+          toDelete.push(d.id); // Mark duplicate (or nameless) for deletion
         } else {
-          seen.add(itemId);
+          seen.add(name);
         }
       });
+
+      if (toDelete.length === 0) {
+        alert("No duplicates found! Your menu is already clean. ✅");
+        setLoading(false);
+        return;
+      }
 
       await Promise.all(toDelete.map(docId => deleteDoc(doc(db, 'menuItems', docId))));
       alert(`Cleaned ${toDelete.length} duplicate item(s) from the menu!`);
@@ -339,7 +345,7 @@ function Admin() {
           <h2 className="admin-section-title" style={{color: '#e74c3c', borderColor: '#e74c3c'}}>Danger Zone</h2>
           <div className="card" style={{borderColor: '#e74c3c', borderStyle: 'dashed', display: 'flex', flexDirection: 'column', gap: '20px'}}>
             <div>
-              <p style={{color: '#888', marginBottom: '10px'}}>
+              <p style={{color: '#868686ff', marginBottom: '10px'}}>
                 <strong>Clean Duplicate Menu Items</strong><br/>
                 Scan and remove any duplicate items from your menu (recommended after the first run).
               </p>
