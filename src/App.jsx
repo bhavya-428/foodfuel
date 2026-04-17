@@ -13,6 +13,7 @@ import Wishlist from './Pages/Wishlist.jsx'
 import Checkout from './Pages/Checkout.jsx'
 import Auth from './Pages/Auth.jsx'
 import Orders from './Pages/Orders.jsx'
+import Admin from './Pages/Admin.jsx'
 import { seedMenu } from './menuSeed'
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
         <Route path="/Checkout" element={<Checkout />} />
         <Route path="/Auth" element={<Auth />} />
         <Route path="/Orders" element={<Orders />} />
+        <Route path="/Admin" element={<Admin />} />
       </Routes>
     </div>
   );

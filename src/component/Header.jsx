@@ -7,7 +7,7 @@ import { StoreContext } from '../StoreContext'
 function Header() {
   const location = useLocation();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  const { cart, wishlist, currentUser, logout } = useContext(StoreContext);
+  const { cart, wishlist, currentUser, isAdmin, logout } = useContext(StoreContext);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -61,6 +61,7 @@ function Header() {
 
           {currentUser ? (
             <>
+              {isAdmin && <NavLink to="/Admin" className="orders-link" style={{color: 'var(--primary)'}}>Admin</NavLink>}
               <NavLink to="/Orders" className="orders-link">My Orders</NavLink>
               <span className="user-email">{currentUser.email.split('@')[0]}</span>
               <button className="btn logout-btn" onClick={logout}>Logout</button>

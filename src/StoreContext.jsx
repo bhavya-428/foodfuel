@@ -17,12 +17,17 @@ export const StoreProvider = ({ children }) => {
   });
 
   const [currentUser, setCurrentUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Admin configuration
+  const ADMIN_EMAILS = ['bhavyasri2001@gmail.com'];
 
   // Auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      setIsAdmin(user ? ADMIN_EMAILS.includes(user.email) : false);
       setAuthLoading(false);
     });
     return () => unsubscribe();
@@ -107,6 +112,7 @@ export const StoreProvider = ({ children }) => {
       cart,
       wishlist,
       currentUser,
+      isAdmin,
       authLoading,
       addToCart,
       removeFromCart,
