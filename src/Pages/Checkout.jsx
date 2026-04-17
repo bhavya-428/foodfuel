@@ -73,7 +73,7 @@ function Checkout() {
           <div className="checkout-card checkout-success">
             <div className="success-icon">🎉</div>
             <div className="success-message">
-              <h2 style={{marginLeft: '300px'}}>Order Placed Successfully!</h2>
+              <h2>Order Placed Successfully!</h2>
               <p>Thank you for choosing Food Club. Your delicious treats will reach you soon!</p>
               <Link to="/Home">
                 <button className="back-home-btn">Back to Home</button>
@@ -92,7 +92,7 @@ function Checkout() {
           <div className="checkout-card checkout-success">
             <div className="success-icon">🔒</div>
             <div className="success-message">
-              <h2 style={{marginLeft: '300px'}}>Sign In to Continue</h2>
+              <h2>Sign In to Continue</h2>
               <p>You need to be logged in to place an order. Join Food Club for free and start ordering!</p>
               <div style={{display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '10px'}}>
                 <Link to="/Auth">
@@ -116,7 +116,7 @@ function Checkout() {
           <div className="checkout-card checkout-success">
             <div className="success-icon">🛒</div>
             <div className="success-message">
-              <h2 style={{marginLeft: '300px'}}>Your cart is empty</h2>
+              <h2>Your cart is empty</h2>
               <p>Add some sweet treats before checking out!</p>
               <Link to="/Menu">
                 <button className="back-home-btn">Explore Menu</button>
