@@ -1,11 +1,14 @@
 import React, { useContext, useState } from 'react';
 import { StoreContext } from '../StoreContext';
 import { Link } from 'react-router-dom';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import './Checkout.css';
 
 function Checkout() {
-  const { cart, removeFromCart } = useContext(StoreContext);
+  const { cart, removeFromCart, currentUser } = useContext(StoreContext);
   const [isOrdered, setIsOrdered] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -32,12 +35,35 @@ function Checkout() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you would send formData and cart data to a server here
-    setIsOrdered(true);
-    // Clear cart would normally happen here too
-    cart.forEach(item => removeFromCart(item.id));
+    setLoading(true);
+
+    try {
+      const orderData = {
+        userId: currentUser ? currentUser.uid : 'guest',
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        shippingInfo: formData,
+        total: total,
+        timestamp: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'orders'), orderData);
+      
+      // Clear cart
+      cart.forEach(item => removeFromCart(item.id));
+      setIsOrdered(true);
+    } catch (error) {
+      console.error("Error saving order:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (isOrdered) {
@@ -204,8 +230,8 @@ function Checkout() {
               </div>
             </div>
 
-            <button type="submit" className="place-order-btn">
-              Place Your Order
+            <button type="submit" className="place-order-btn" disabled={loading}>
+              {loading ? 'Processing...' : 'Place Your Order'}
             </button>
           </div>
         </form>

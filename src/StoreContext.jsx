@@ -1,4 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { auth, db } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
 export const StoreContext = createContext();
 
@@ -13,13 +16,48 @@ export const StoreProvider = ({ children }) => {
     return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
 
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Auth listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Sync Wishlist with Firestore when user logs in
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const wishlistRef = doc(db, 'wishlists', currentUser.uid);
+    
+    const unsubscribe = onSnapshot(wishlistRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setWishlist(docSnap.data().items || []);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Save Cart to LocalStorage
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Save Wishlist to LocalStorage (for guests)
   useEffect(() => {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
+    
+    // Also save to Firestore if logged in
+    if (currentUser) {
+      const wishlistRef = doc(db, 'wishlists', currentUser.uid);
+      setDoc(wishlistRef, { items: wishlist }, { merge: true });
+    }
+  }, [wishlist, currentUser]);
 
   const addToCart = (item) => {
     setCart((prevCart) => {
@@ -59,14 +97,22 @@ export const StoreProvider = ({ children }) => {
     });
   };
 
+  const logout = async () => {
+    await signOut(auth);
+    setWishlist([]); // Clear local wishlist state on logout
+  };
+
   return (
     <StoreContext.Provider value={{
       cart,
       wishlist,
+      currentUser,
+      authLoading,
       addToCart,
       removeFromCart,
       updateQuantity,
-      toggleWishlist
+      toggleWishlist,
+      logout
     }}>
       {children}
     </StoreContext.Provider>

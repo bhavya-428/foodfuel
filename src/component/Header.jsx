@@ -3,10 +3,11 @@ import './Header.css'
 import logo from "../assets/logo.png"
 import { NavLink, Link, useLocation } from "react-router-dom"
 import { StoreContext } from '../StoreContext'
+
 function Header() {
   const location = useLocation();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  const { cart, wishlist } = useContext(StoreContext);
+  const { cart, wishlist, currentUser, logout } = useContext(StoreContext);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -58,19 +59,17 @@ function Header() {
             )}
           </Link>
 
-          {/* <Link to="/Cart">
-            <button className='btn'>Order Now</button>
-          </Link> */}
-          if(isEmpty){
-            <Link to="/Menu">
-              <button className='btn'>Order Now</button>
+          {currentUser ? (
+            <>
+              <NavLink to="/Orders" className="orders-link">My Orders</NavLink>
+              <span className="user-email">{currentUser.email.split('@')[0]}</span>
+              <button className="btn logout-btn" onClick={logout}>Logout</button>
+            </>
+          ) : (
+            <Link to="/Auth">
+              <button className='btn'>Login</button>
             </Link>
-          }
-          else{
-            <Link to="/Checkout">
-              <button className='btn'>Order Now</button>
-            </Link>
-          }
+          )}
         </div>
       </nav>
     </header>

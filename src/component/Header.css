@@ -132,6 +132,22 @@
   background: var(--secondary-hover);
 }
 
+.user-email {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  background: var(--bg-color);
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+}
+
+.logout-btn {
+  background: var(--primary) !important;
+  padding: 10px 22px !important;
+  font-size: 0.85rem !important;
+}
+
 @media (max-width: 768px) {
   .header {
     padding: 15px 20px;
