@@ -90,7 +90,39 @@ function Admin() {
   if (authLoading) return <div className="spinner" style={{margin: '100px auto'}}></div>;
   if (!isAdmin) return <Navigate to="/Home" />;
 
-     const totalRevenue = orders.reduce((sum, order) => {
+     const handleResetData = async () => {
+    const confirmation = window.prompt("WARNING: This will delete ALL orders and ALL member profiles (except yours). This cannot be undone. Type 'RESET' to confirm.");
+    if (confirmation !== 'RESET') return;
+
+    setLoading(true);
+    try {
+      // 1. Delete all Orders
+      const orderSnap = await getDocs(collection(db, 'orders'));
+      const orderDeletions = orderSnap.docs.map(d => deleteDoc(doc(db, 'orders', d.id)));
+      
+      // 2. Delete all Wishlists
+      const wishlistSnap = await getDocs(collection(db, 'wishlists'));
+      const wishlistDeletions = wishlistSnap.docs.map(d => deleteDoc(doc(db, 'wishlists', d.id)));
+
+      // 3. Delete all Users (Except Admin)
+      const userSnap = await getDocs(collection(db, 'users'));
+      const userDeletions = userSnap.docs
+        .filter(d => d.data().email !== 'v.bhavyasri2001@gmail.com')
+        .map(d => deleteDoc(doc(db, 'users', d.id)));
+
+      await Promise.all([...orderDeletions, ...wishlistDeletions, ...userDeletions]);
+      
+      alert("Database Reset Successful! All customer data has been cleared.");
+      window.location.reload(); // Refresh to show clean slate
+    } catch (error) {
+      console.error("Error resetting data:", error);
+      alert("Reset failed. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalRevenue = orders.reduce((sum, order) => {
         if (order.status === "cancelled") return sum; // skip cancelled
          return sum + (parseFloat(order.total) || 0);
                  }, 0);
@@ -275,6 +307,18 @@ function Admin() {
             )}
           </div>
         )}
+        <div className="danger-zone">
+          <h2 className="admin-section-title" style={{color: '#e74c3c', borderColor: '#e74c3c'}}>Danger Zone</h2>
+          <div className="card" style={{borderColor: '#e74c3c', borderStyle: 'dashed'}}>
+            <p style={{color: var('--muted-text'), marginBottom: '15px'}}>
+              Reset the customer database to clear all orders, wishlists, and non-admin profiles. 
+              <strong> This cannot be undone.</strong>
+            </p>
+            <button className="btn" style={{background: '#e74c3c', width: 'auto'}} onClick={handleResetData}>
+              Reset Customer Database
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
