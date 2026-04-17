@@ -122,6 +122,34 @@ function Admin() {
     }
   };
 
+  const handleCleanDuplicates = async () => {
+    if (!window.confirm("This will scan the menu and remove duplicate items. Proceed?")) return;
+    setLoading(true);
+    try {
+      const snap = await getDocs(collection(db, 'menuItems'));
+      const seen = new Set();
+      const toDelete = [];
+
+      snap.docs.forEach(d => {
+        const itemId = d.data().id;
+        if (seen.has(itemId)) {
+          toDelete.push(d.id); // Mark duplicate for deletion
+        } else {
+          seen.add(itemId);
+        }
+      });
+
+      await Promise.all(toDelete.map(docId => deleteDoc(doc(db, 'menuItems', docId))));
+      alert(`Cleaned ${toDelete.length} duplicate item(s) from the menu!`);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error cleaning duplicates:", error);
+      alert("Failed to clean duplicates.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const totalRevenue = orders.reduce((sum, order) => {
         if (order.status === "cancelled") return sum; // skip cancelled
          return sum + (parseFloat(order.total) || 0);
@@ -309,14 +337,26 @@ function Admin() {
         )}
         <div className="danger-zone">
           <h2 className="admin-section-title" style={{color: '#e74c3c', borderColor: '#e74c3c'}}>Danger Zone</h2>
-          <div className="card" style={{borderColor: '#e74c3c', borderStyle: 'dashed'}}>
-            <p style={{color: '#888', marginBottom: '15px'}}>
-              Reset the customer database to clear all orders, wishlists, and non-admin profiles. 
-              <strong> This cannot be undone.</strong>
-            </p>
-            <button className="btn" style={{background: '#e74c3c', width: 'auto'}} onClick={handleResetData}>
-              Reset Customer Database
-            </button>
+          <div className="card" style={{borderColor: '#e74c3c', borderStyle: 'dashed', display: 'flex', flexDirection: 'column', gap: '20px'}}>
+            <div>
+              <p style={{color: '#888', marginBottom: '10px'}}>
+                <strong>Clean Duplicate Menu Items</strong><br/>
+                Scan and remove any duplicate items from your menu (recommended after the first run).
+              </p>
+              <button className="btn" style={{background: '#e67e22', width: 'auto'}} onClick={handleCleanDuplicates}>
+                Clean Duplicates
+              </button>
+            </div>
+            <hr style={{borderColor: 'rgba(231,76,60,0.3)'}} />
+            <div>
+              <p style={{color: '#888', marginBottom: '10px'}}>
+                <strong>Reset Customer Database</strong><br/>
+                Delete ALL orders, wishlists, and member profiles (except yours). <strong>Cannot be undone.</strong>
+              </p>
+              <button className="btn" style={{background: '#e74c3c', width: 'auto'}} onClick={handleResetData}>
+                Reset Customer Database
+              </button>
+            </div>
           </div>
         </div>
       </div>

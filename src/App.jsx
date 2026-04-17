@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import './App.css'
 import Header from './component/Header.jsx'
 import HeroSec from './component/herosec.jsx'
@@ -14,12 +14,7 @@ import Checkout from './Pages/Checkout.jsx'
 import Auth from './Pages/Auth.jsx'
 import Orders from './Pages/Orders.jsx'
 import Admin from './Pages/Admin.jsx'
-import { seedMenu } from './menuSeed'
-
 function App() {
-  useEffect(() => {
-    seedMenu();
-  }, []);
 
   return (
     <div>
