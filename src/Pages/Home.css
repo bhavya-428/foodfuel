@@ -36,8 +36,8 @@
   padding: 22px 50px;
   border-radius: 50px;
   border: none;
-  background: var(--dark);
-  color: white;
+  background: var(--text);
+  color: var(--text-color);
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;

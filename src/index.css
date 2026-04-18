@@ -7,7 +7,7 @@
   --accent: #FFD369;
   --dark: #2C2C2C;
   --light: #F9FAFB;
-  
+  --text: #ffffff;
   --bg-color: #F9FAFB;
   --text-color: var(--dark);
   --shadow: 0 8px 32px 0 rgba(44, 44, 44, 0.08); /* Adjusted shadow for new palette */
@@ -28,7 +28,7 @@
   --accent: #FFD369;
   --dark: #F9FAFB;
   --light: #2C2C2C;
-  
+  --text: #000000;
   --bg-color: #2C2C2C;
   --text-color: #F9FAFB;
   --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
