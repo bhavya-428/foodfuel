@@ -228,12 +228,40 @@
 }
 
 @media (max-width: 768px) {
+  .category-item {
+    padding: 6px 14px;
+    font-size: 16px;
+  }
+  
   .menu-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 20px;
   }
   
   .horizontal-menu-container {
     padding: 10px 15px;
   }
+
+  .menu-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .menu-price {
+    font-size: 1.3rem;
+  }
 }
+
+@media (max-width: 480px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-card-img-container {
+    height: 200px;
+  }
+
+  .category-list {
+    gap: 8px;
+  }
+}
+
