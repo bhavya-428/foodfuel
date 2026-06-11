@@ -1,0 +1,115 @@
+.franchise-page {
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+.franchise-hero {
+  height: 400px;
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?q=80&w=1200&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  padding: 0 20px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+}
+
+.hero-desc {
+  font-size: 1.4rem;
+  max-width: 700px;
+}
+
+.franchise-container {
+  padding: 80px 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  color: var(--text-color);
+}
+
+.section-divider {
+  width: 80px;
+  height: 4px;
+  background: var(--primary);
+  margin: 20px auto;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+}
+
+.benefit-card {
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: var(--card-shadow);
+  border-bottom: 4px solid var(--secondary);
+  transition: var(--transition);
+}
+
+.benefit-card:hover {
+  transform: translateY(-10px);
+}
+
+.benefit-icon {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.benefit-title {
+  margin-bottom: 15px;
+}
+
+.benefit-desc {
+  color: var(--muted-text);
+}
+
+.inquiry-section {
+  marginTop: 80px;
+  background: var(--card-bg);
+  padding: 60px;
+  border-radius: 30px;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.inquiry-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.inquiry-desc {
+  font-size: 1.2rem;
+  color: var(--muted-text);
+  margin-bottom: 40px;
+}
+
+.inquire-btn {
+  padding: 20px 50px;
+  border-radius: 50px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
