@@ -36,11 +36,21 @@ function HorizontalMenu() {
           setMenuItems(items);
         } else {
           console.warn("Firestore menuItems collection is empty. Falling back to local list.");
-          setMenuItems(localMenuItems);
+          const localOutOfStock = JSON.parse(localStorage.getItem('localOutOfStockIds') || '[]');
+          const itemsWithLocalStock = localMenuItems.map(i => ({
+            ...i,
+            outOfStock: localOutOfStock.includes(i.id)
+          }));
+          setMenuItems(itemsWithLocalStock);
         }
       } catch (error) {
         console.error("Error fetching menu items, falling back to local list:", error);
-        setMenuItems(localMenuItems);
+        const localOutOfStock = JSON.parse(localStorage.getItem('localOutOfStockIds') || '[]');
+        const itemsWithLocalStock = localMenuItems.map(i => ({
+          ...i,
+          outOfStock: localOutOfStock.includes(i.id)
+        }));
+        setMenuItems(itemsWithLocalStock);
       } finally {
         setLoading(false);
       }
@@ -48,9 +58,10 @@ function HorizontalMenu() {
     fetchItems();
   }, []);
 
-  const filteredItems = activeCategory === 'All' 
+  const filteredItems = (activeCategory === 'All' 
     ? menuItems 
-    : menuItems.filter(item => item.type === activeCategory);
+    : menuItems.filter(item => item.type === activeCategory)
+  ).filter(item => !item.outOfStock);
 
   if (loading) {
     return (

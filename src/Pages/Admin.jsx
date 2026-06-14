@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { db } from '../firebase';
-import { collection, query, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { StoreContext } from '../StoreContext';
 import { Navigate } from 'react-router-dom';
 import './Admin.css';
@@ -11,11 +11,11 @@ function Admin() {
   const [menuItems, setMenuItems] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { currentUser, isAdmin, authLoading } = useContext(StoreContext);
+  const { isAdmin, authLoading } = useContext(StoreContext);
   // Menu Management form states
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [menuForm, setMenuForm] = useState({ name: '', price: '', type: 'Ice Creams', img: '' });
+  const [menuForm, setMenuForm] = useState({ name: '', price: '', type: 'Ice Cream', img: '', outOfStock: false });
   // Fetch all necessary data on mount
   useEffect(() => {
     const fetchAllData = async () => {
@@ -60,10 +60,21 @@ function Admin() {
         }
 
         if (menuList.length === 0) {
-          // Import menuItems locally for admin panel too if firestore has none or fails
-          // But we can import from menuSeed directly using window or import it
-          const { menuItems: localMenu } = await import('../menuSeed');
-          menuList = localMenu;
+          try {
+            const { seedMenu } = await import('../menuSeed');
+            await seedMenu();
+            // Refetch menu items from Firestore
+            const menuSnap = await getDocs(collection(db, 'menuItems'));
+            menuList = menuSnap.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+          } catch (seedErr) {
+            console.error("Failed to seed menu items to Firestore, falling back to local:", seedErr);
+            const { menuItems: localMenu } = await import('../menuSeed');
+            const localOutOfStockIds = JSON.parse(localStorage.getItem('localOutOfStockIds') || '[]');
+            menuList = localMenu.map(i => ({
+              ...i,
+              outOfStock: localOutOfStockIds.includes(i.id)
+            }));
+          }
         }
         menuList.sort((a, b) => (a.id || 0) - (b.id || 0));
         setMenuItems(menuList);
@@ -149,6 +160,7 @@ function Admin() {
         price: menuForm.price,
         type: menuForm.type,
         img: menuForm.img,
+        outOfStock: menuForm.outOfStock || false,
         id: Date.now() // Unique numeric identifier for lists/carts
       };
       
@@ -156,7 +168,7 @@ function Admin() {
       alert("Menu item added successfully!");
       
       setMenuItems([...menuItems, { ...newItemData, docId: docRef.id }]);
-      setMenuForm({ name: '', price: '', type: 'Ice Creams', img: '' });
+      setMenuForm({ name: '', price: '', type: 'Ice Creams', img: '', outOfStock: false });
     } catch (error) {
       console.error("Error adding item:", error);
       alert("Failed to add menu item.");
@@ -169,23 +181,42 @@ function Admin() {
     if (!editingItem) return;
 
     try {
-      const itemRef = doc(db, 'menuItems', editingItem.docId);
       const updatedFields = {
         name: menuForm.name,
         price: menuForm.price,
         type: menuForm.type,
-        img: menuForm.img
+        img: menuForm.img,
+        outOfStock: menuForm.outOfStock || false
       };
 
-      await updateDoc(itemRef, updatedFields);
+      if (editingItem.docId) {
+        const itemRef = doc(db, 'menuItems', editingItem.docId);
+        await updateDoc(itemRef, updatedFields);
+      } else {
+        // LocalStorage fallback for editing seed items
+        const localOutOfStock = JSON.parse(localStorage.getItem('localOutOfStockIds') || '[]');
+        if (updatedFields.outOfStock) {
+          if (!localOutOfStock.includes(editingItem.id)) {
+            localOutOfStock.push(editingItem.id);
+          }
+        } else {
+          const index = localOutOfStock.indexOf(editingItem.id);
+          if (index > -1) {
+            localOutOfStock.splice(index, 1);
+          }
+        }
+        localStorage.setItem('localOutOfStockIds', JSON.stringify(localOutOfStock));
+      }
       alert("Menu item updated successfully!");
 
       setMenuItems(menuItems.map(item => 
-        item.docId === editingItem.docId ? { ...item, ...updatedFields } : item
+        (item.docId && item.docId === editingItem.docId) || item.id === editingItem.id
+          ? { ...item, ...updatedFields } 
+          : item
       ));
 
       // Reset editing states
-      setMenuForm({ name: '', price: '', type: 'Ice Creams', img: '' });
+      setMenuForm({ name: '', price: '', type: 'Ice Creams', img: '', outOfStock: false });
       setEditingItem(null);
       setIsEditMode(false);
     } catch (error) {
@@ -204,6 +235,39 @@ function Admin() {
     } catch (error) {
       console.error("Error deleting menu item:", error);
       alert("Failed to delete menu item.");
+    }
+  };
+
+  // Toggle Out of Stock handler
+  const handleToggleOutOfStock = async (item) => {
+    try {
+      const newStatus = !item.outOfStock;
+      if (item.docId) {
+        const itemRef = doc(db, 'menuItems', item.docId);
+        await updateDoc(itemRef, { outOfStock: newStatus });
+      } else {
+        // LocalStorage fallback for toggling seed items
+        const localOutOfStock = JSON.parse(localStorage.getItem('localOutOfStockIds') || '[]');
+        if (newStatus) {
+          if (!localOutOfStock.includes(item.id)) {
+            localOutOfStock.push(item.id);
+          }
+        } else {
+          const index = localOutOfStock.indexOf(item.id);
+          if (index > -1) {
+            localOutOfStock.splice(index, 1);
+          }
+        }
+        localStorage.setItem('localOutOfStockIds', JSON.stringify(localOutOfStock));
+      }
+      setMenuItems(menuItems.map(i => 
+        (i.docId && i.docId === item.docId) || i.id === item.id 
+          ? { ...i, outOfStock: newStatus } 
+          : i
+      ));
+    } catch (error) {
+      console.error("Error toggling stock status:", error);
+      alert("Failed to update stock status. Please try again.");
     }
   };
 
@@ -473,6 +537,17 @@ function Admin() {
                     required 
                   />
                 </div>
+
+                <div className="form-group-admin form-checkbox-admin">
+                  <label className="checkbox-label-admin">
+                    <input 
+                      type="checkbox" 
+                      checked={menuForm.outOfStock || false} 
+                      onChange={e => setMenuForm({...menuForm, outOfStock: e.target.checked})} 
+                    />
+                    Out of Stock
+                  </label>
+                </div>
                 
                 <div className="form-actions-admin">
                   <button type="submit" className="browse-btn">
@@ -485,7 +560,7 @@ function Admin() {
                       onClick={() => {
                         setIsEditMode(false);
                         setEditingItem(null);
-                        setMenuForm({ name: '', price: '', type: 'Ice Creams', img: '' });
+                        setMenuForm({ name: '', price: '', type: 'Ice Creams', img: '', outOfStock: false });
                       }}
                     >
                       Cancel
@@ -500,8 +575,18 @@ function Admin() {
               {loading ? <div className="spinner" style={{margin: '50px auto'}}></div> : (
                 <div className="menu-grid-admin">
                   {menuItems.map(item => (
-                    <div key={item.docId || item.id} className="menu-item-mini-card">
-                      <img src={item.img} alt={item.name} className="menu-item-img-admin" />
+                    <div key={item.docId || item.id} className={`menu-item-mini-card ${item.outOfStock ? 'out-of-stock-card' : ''}`}>
+                      <div className="menu-item-img-container-admin">
+                        <img src={item.img} alt={item.name} className="menu-item-img-admin" />
+                        <button 
+                          type="button"
+                          className={`stock-badge-admin ${item.outOfStock ? 'out' : 'in'}`}
+                          onClick={() => handleToggleOutOfStock(item)}
+                          title="Click to toggle stock status"
+                        >
+                          {item.outOfStock ? 'Out of Stock' : 'In Stock'}
+                        </button>
+                      </div>
                       <div className="menu-item-text-admin">
                         <strong className="menu-item-name-admin">{item.name}</strong>
                         <span className="menu-item-category-admin">{item.type}</span>
@@ -516,7 +601,8 @@ function Admin() {
                               name: item.name,
                               price: item.price,
                               type: item.type,
-                              img: item.img
+                              img: item.img,
+                              outOfStock: item.outOfStock || false
                             });
                             setIsEditMode(true);
                           }}
